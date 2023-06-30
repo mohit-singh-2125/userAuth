@@ -1,0 +1,32 @@
+{
+  "name": "userauth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohit-singh-2125/userAuth.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mohit-singh-2125/userAuth/issues"
+  },
+  "homepage": "https://github.com/mohit-singh-2125/userAuth#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1407.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-s3": "^3.0.1",
+    "mysql2": "^3.4.2",
+    "nodemailer": "^6.9.3",
+    "sequelize": "^6.32.1"
+  }
+}
