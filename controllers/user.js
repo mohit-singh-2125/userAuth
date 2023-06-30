@@ -28,8 +28,12 @@ const registerUsers = async (req, res) => {
         message: "User Already Exist",
       });
     }
-    let s3Response = await uploadImg(file);
-    const { Location: url } = s3Response[0]
+    let url
+    if(file.length>0){
+      let s3Response = await uploadImg(file);
+      const { Location } = s3Response[0]
+      url=Location
+    }
     const {
       message: { id: userId },
     } = await userServices.create({
@@ -120,8 +124,13 @@ const updateUserProfile = async (req, res) => {
         message: "No user Found",
       });
     }
-    let s3Response = await uploadImg(file);
-    const { Location: url } = s3Response[0]
+    let url
+    if(file.length>0){
+      let s3Response = await uploadImg(file);
+      const { Location } = s3Response[0]
+      url=Location
+    }
+   
 
     const {
       message
