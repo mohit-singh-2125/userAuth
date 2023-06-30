@@ -1,7 +1,8 @@
 const { UsersClass } = require("../services/user");
 const userServices = new UsersClass();
-const { uploadImg, decryptPassword } = require("../utils/index");
-const { sendEmail } = require("../utils/nodemailer");
+const { uploadImg  } = require("../utils/awsS3Config");
+const { sendEmail } = require("../utils/sendEmail");
+const { decryptPassword } = require("../utils/index");
 
 
 const registerUsers = async (req, res) => {
@@ -10,10 +11,15 @@ const registerUsers = async (req, res) => {
     const { userName, contactNo, email, password } = JSON.parse(
       req.body.data
     );
-    await sendEmail(email)
+
     let file = req.files;
 
-    let { status: userExist } = await userServices.verifyIfExist(email);
+    let { status: userExist } = await userServices.verifyIfExist(
+      {
+        email_id: email,
+        is_active: true,
+      }
+    );
 
     if (userExist) {
       return res.status(409).json({
@@ -34,12 +40,55 @@ const registerUsers = async (req, res) => {
       url,
     });
 
-    await userServices.createUserOtp(userId);
-
+    const { message: { user_otp: otp } } = await userServices.createUserOtp(userId);
+    await sendEmail(email, { userName, otp })
     return res.status(200).json({
       status: "SUCCESS",
       statusCode: 200,
       message: "User Created",
+    });
+  } catch (err) {
+    console.log("err", err);
+    return res.status(500).json({
+      status: "ERROR",
+      statusCode: 500,
+      message: err,
+    });
+  }
+};
+
+const validateUserOtp = async (req, res) => {
+  try {
+
+    const { email, otp } = req.body;
+
+    let { status: userExist } = await userServices.verifyIfExist({
+      email_id: email,
+      is_active: true,
+      is_otp_verified: false,
+    });
+
+    if (!userExist) {
+      return res.status(409).json({
+        status: "FAILURE",
+        statusCode: 409,
+        message: "User Already Exist",
+      });
+    }
+
+    const { message: { users_otp_validate: { user_otp } } } = await userServices.findUserOtp(email);
+    let response = {
+      message: "Invalid OTP"
+    }
+    if (otp === user_otp) {
+      await userServices.updateUserOtpStatus(email);
+      response.message = "User OTP Verified Successfully"
+    }
+
+    return res.status(200).json({
+      status: "SUCCESS",
+      statusCode: 200,
+      message: { ...response },
     });
   } catch (err) {
     console.log("err", err);
@@ -59,7 +108,10 @@ const updateUserProfile = async (req, res) => {
     );
     let file = req.files;
 
-    let { status: userExist } = await userServices.verifyIfExist(email);
+    let { status: userExist } = await userServices.verifyIfExist({
+      email_id: email,
+      is_active: true,
+    });
 
     if (!userExist) {
       return res.status(409).json({
@@ -99,7 +151,10 @@ const deleteUserProfile = async (req, res) => {
     const { userId, email } = req.query
 
 
-    let { status: userExist } = await userServices.verifyIfExist(email);
+    let { status: userExist } = await userServices.verifyIfExist({
+      email_id: email,
+      is_active: true,
+    });
 
     if (!userExist) {
       return res.status(409).json({
@@ -136,7 +191,10 @@ const loginUserProfile = async (req, res) => {
     const { email, password } = req.body
 
 
-    let { status: userExist } = await userServices.verifyIfExist(email);
+    let { status: userExist } = await userServices.verifyIfExist({
+      email_id: email,
+      is_active: true,
+    });
 
     if (!userExist) {
       return res.status(409).json({
@@ -147,14 +205,14 @@ const loginUserProfile = async (req, res) => {
     }
 
     const {
-      message: { id, user_name,email_id, contact_no, profile_pic, password: encPassword }
+      message: { id, user_name, email_id, contact_no, profile_pic, password: encPassword }
     } = await userServices.findOne(
       email,
     );
 
     const isPasswordMatched = decryptPassword(password, encPassword)
 
-    let response = { }
+    let response = {}
 
     if (isPasswordMatched) {
       response.message = 'Login Successful'
@@ -184,11 +242,13 @@ const loginUserProfile = async (req, res) => {
 };
 const resetUserPassword = async (req, res) => {
   try {
-console.log("asddsasadsda",req.body)
     const { email, newPassword } = req.body
 
 
-    let { status: userExist } = await userServices.verifyIfExist(email);
+    let { status: userExist } = await userServices.verifyIfExist({
+      email_id: email,
+      is_active: true,
+    });
 
     if (!userExist) {
       return res.status(409).json({
@@ -201,7 +261,7 @@ console.log("asddsasadsda",req.body)
     const {
       message
     } = await userServices.updatePassword(
-     { email,password:newPassword}
+      { email, password: newPassword }
     );
 
     return res.status(200).json({
@@ -225,5 +285,6 @@ module.exports = {
   updateUserProfile,
   deleteUserProfile,
   loginUserProfile,
-  resetUserPassword
+  resetUserPassword,
+  validateUserOtp
 };

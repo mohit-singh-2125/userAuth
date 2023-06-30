@@ -4,13 +4,13 @@ const userSchemaModel = MODELS.users;
 const userOtpValidateSchemaModel = MODELS.users_otp_validate;
 
 class Users {
-  async verifyIfExist(email) {
+
+  async verifyIfExist(obj) {
     try {
       const res = await userSchemaModel.findOne({
         where: {
-          email_id: email,
-          is_active: true,
-          // is_otp_verified: true,
+          ...obj
+
         },
       });
       if (res) {
@@ -71,6 +71,51 @@ class Users {
     }
   }
 
+  async findUserOtp(email) {
+    try {
+      const res = await userSchemaModel.findOne({
+        include: [{
+          model: userOtpValidateSchemaModel,
+          required: true
+        }],
+        where: { email_id: email, }
+      });
+      return {
+        status: true,
+        message: res,
+      };
+    } catch (err) {
+      return {
+        status: false,
+        message: err,
+      };
+    }
+  }
+
+  async updateUserOtpStatus(email) {
+    try {
+      const res = await userSchemaModel.update(
+        {
+          is_otp_verified: true,
+        },
+        {
+          where: {
+            email_id: email,
+          },
+        }
+      );
+      return {
+        status: true,
+        message: res,
+      };
+    } catch (err) {
+      return {
+        status: false,
+        message: err,
+      };
+    }
+  }
+
   async update(reqParams) {
     try {
       const { userId, userName, contactNo, email, url } = reqParams;
@@ -99,7 +144,7 @@ class Users {
     }
   }
 
-  async delete({userId,email}) {
+  async delete({ userId, email }) {
     try {
       const res = await userSchemaModel.update(
         {

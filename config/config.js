@@ -17,5 +17,9 @@ module.exports = {
       secretAccessKey: process.env.SECRET_ACCESS_KEY,
       bucketName: process.env.BUCKET_NAME,
       bucketRegion: process.env.BUCKET_REGION
-  }
+  },
+  MAIL_CONFIG:{
+    API_KEY: process.env.API_KEY,
+    SENDER_EMAIL: process.env.SENDER_EMAIL,
+}
 };
