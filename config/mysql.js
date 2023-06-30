@@ -3,7 +3,7 @@ const model = require('../models/index');
 module.exports = {
     bootstrap: () => {
         model.connection.sync({
-            alter:true,
+            alter:false,
             force:false
         }).then(() => {
             console.log('MYSQL CONNECTED :: SUCCESS');

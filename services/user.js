@@ -9,6 +9,8 @@ class Users {
       const res = await userSchemaModel.findOne({
         where: {
           email_id: email,
+          is_active: true,
+          // is_otp_verified: true,
         },
       });
       if (res) {
@@ -76,12 +78,12 @@ class Users {
         {
           user_name: userName,
           contact_no: contactNo,
-          email_id: email,
           profile_pic: url,
         },
         {
           where: {
             id: userId,
+            email_id: email,
           },
         }
       );
@@ -97,7 +99,7 @@ class Users {
     }
   }
 
-  async delete(userId) {
+  async delete({userId,email}) {
     try {
       const res = await userSchemaModel.update(
         {
@@ -106,9 +108,11 @@ class Users {
         {
           where: {
             id: userId,
+            email_id: email,
           },
         }
       );
+      console.log("SADsadd")
       return {
         status: true,
         message: res,
@@ -121,13 +125,11 @@ class Users {
     }
   }
 
-  async verify(reqParams) {
+  async findOne(email) {
     try {
-      const { email, password } = reqParams;
       const res = await userSchemaModel.findOne({
         where: {
           email_id: email,
-          password,
         },
       });
       return {
@@ -142,15 +144,16 @@ class Users {
     }
   }
 
-  async updatePassword(password) {
+  async updatePassword(reqParams) {
     try {
+      const { email, password } = reqParams;
       const res = await userSchemaModel.update(
         {
-          password,
+          password: encryptPassword(password),
         },
         {
           where: {
-            id: userId,
+            email_id: email,
           },
         }
       );
