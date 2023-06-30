@@ -72,7 +72,7 @@ const validateUserOtp = async (req, res) => {
       return res.status(409).json({
         status: "FAILURE",
         statusCode: 409,
-        message: "User Already Exist",
+        message: "Invalid Email",
       });
     }
 
@@ -126,7 +126,7 @@ const updateUserProfile = async (req, res) => {
     const {
       message
     } = await userServices.update({
-      userId, userName, contactNo, email, url
+       userName, contactNo, email, url
     });
 
 

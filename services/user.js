@@ -127,7 +127,6 @@ class Users {
         },
         {
           where: {
-            id: userId,
             email_id: email,
           },
         }
