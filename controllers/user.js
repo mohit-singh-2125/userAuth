@@ -219,7 +219,7 @@ const loginUserProfile = async (req, res) => {
       email,
     );
 
-    const isPasswordMatched = decryptPassword(password, encPassword)
+    const isPasswordMatched = await decryptPassword(password, encPassword)
 
     let response = {}
 
